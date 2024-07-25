@@ -53,11 +53,27 @@ RUN cp -p "${SPARK_HOME}/conf/spark-defaults.conf.template" "${SPARK_HOME}/conf/
     echo 'spark.driver.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf" && \
     echo 'spark.executor.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf"
 
+# Hadoop installation
+RUN wget -q "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" && \
+    tar xzf "hadoop-${HADOOP_VERSION}.tar.gz" -C /usr/local && \
+    rm "hadoop-${HADOOP_VERSION}.tar.gz" && \
+    ln -s /usr/local/hadoop-${HADOOP_VERSION} /usr/local/hadoop
+
+# Configure Hadoop
+ENV HADOOP_HOME=/usr/local/hadoop \
+    HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop \
+    PATH=$PATH:/usr/local/hadoop/bin:/usr/local/hadoop/sbin
+
 USER ${NB_UID}
 
-# Install pyarrow
+# Install pyarrow and other necessary packages
 RUN mamba install --quiet --yes \
-    'pyarrow' && \
+    'pyarrow' \
+    'pandas' \
+    'numpy' \
+    'matplotlib' \
+    'scipy' \
+    'seaborn' && \
     mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
