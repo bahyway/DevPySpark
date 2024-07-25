@@ -1,0 +1,8 @@
+databricks-cli
+databricks-connect
+pyarrow
+pandas
+numpy
+matplotlib
+scipy
+seaborn

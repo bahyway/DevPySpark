@@ -64,18 +64,16 @@ ENV HADOOP_HOME=/usr/local/hadoop \
     HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop \
     PATH=$PATH:/usr/local/hadoop/bin:/usr/local/hadoop/sbin
 
+# Copy requirements.txt and install Python packages
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r /tmp/requirements.txt && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 USER ${NB_UID}
 
-# Install pyarrow and other necessary packages
-RUN mamba install --quiet --yes \
-    'pyarrow' \
-    'pandas' \
-    'numpy' \
-    'matplotlib' \
-    'scipy' \
-    'seaborn' && \
-    mamba clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
+# Fix permissions for installed packages
+RUN fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
 WORKDIR "${HOME}"
